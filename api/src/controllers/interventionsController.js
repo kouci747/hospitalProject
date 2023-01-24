@@ -20,3 +20,20 @@ exports.addIntervention = (req, res) => {
       res.status(404).send(err);
     });
 };
+
+exports.getAllInterventions = (req, res) => {
+  Intervention.find()
+    .then((interventions) => {
+      res.send(interventions);
+    })
+    .catch((err) => res.send(err));
+};
+/*
+exports.getUsers = (req, res) => {
+  User.find()
+    .then((users) => {
+      res.send(users);
+    })
+    .catch((err) => res.send(err));
+};
+*/
