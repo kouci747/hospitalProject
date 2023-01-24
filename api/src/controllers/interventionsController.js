@@ -33,7 +33,7 @@ exports.getAllInterventions = (req, res) => {
 
 //Récupérer les interventions, filtrées selon la demande du test technique
 //récupère et classe les chirurgiens par leur nombre d'intervention (ordre décroissant)
-exports.getFilteredInterventions = (req, res) => {
+exports.getSurgeonsByNumberOfInterventions = (req, res) => {
   Intervention.aggregate([
     {
       $group: {
@@ -45,10 +45,41 @@ exports.getFilteredInterventions = (req, res) => {
       },
     },
     { $sort: { count: -1 } },
+    // {
+    //   $group: {
+    //     _id: {
+    //       surgeon: '$surgeon',
+    //       anesthsiste: '$anesthsiste',
+    //     },
+    //     count: { $sum: 1 },
+    //   },
+    // },
+    // { $sort: { count: -1 } },
   ])
 
     .then((chirurgiens) => {
       res.send(chirurgiens);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
+exports.getGroupsOfSurgeonsAndAnesthesist = (req, res) => {
+  Intervention.aggregate([
+    {
+      $group: {
+        _id: {
+          surgeon: '$surgeon',
+          anesthsiste: '$anesthsiste',
+        },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { count: -1 } },
+  ])
+    .then((Surgeon_Anesthesist_groups_occ) => {
+      res.send(Surgeon_Anesthesist_groups_occ);
     })
     .catch((err) => {
       res.send(err);
