@@ -8,4 +8,10 @@ router.post('/addIntervention', interventionsController.addIntervention);
 //GET : http://localhost:9000/api/v1/intervention/getInterventions
 router.get('/getInterventions', interventionsController.getAllInterventions);
 
+//GET
+router.get(
+  '/getFilteredInterventions',
+  interventionsController.getFilteredInterventions
+);
+
 module.exports = router;
