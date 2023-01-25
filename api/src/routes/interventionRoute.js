@@ -22,4 +22,12 @@ router.get(
 
 //test
 router.get('/getAnest', interventionsController.getAnest);
+
+//retourne l'intervention la plus fréquentée du chirurgien
+router.get(
+  '/getMostFreqIntervention',
+  interventionsController.getMostFreqIntervention
+);
+
+router.get('/resultatTri', interventionsController.resultatTri);
 module.exports = router;

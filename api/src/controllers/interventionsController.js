@@ -122,7 +122,7 @@ exports.getGroupsOfSurgeonsAndAnesthesist = async (req, res) => {
 // };
 
 exports.getAnest = (req, res) => {
-  const spe = Intervention.find().projection('specialty');
+  //const spe = Intervention.find().projection('specialty');
   Intervention.aggregate([
     {
       $group: {
@@ -142,4 +142,63 @@ exports.getAnest = (req, res) => {
     .catch((err) => {
       res.send(err);
     });
+};
+
+exports.getMostFreqIntervention = (req, res) => {
+  Intervention.aggregate([
+    {
+      $group: {
+        _id: {
+          surgeon: '$surgeon',
+          intervention: '$intervention',
+        },
+
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { count: -1 } },
+  ])
+    .then((inter) => {
+      res.send(inter);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
+//tester
+
+exports.resultatTri = (req, res) => {
+  Intervention.aggregate(
+    [
+      {
+        $group: {
+          _id: { surgeon: '$surgeon', specialty: '$specialty' },
+          numberOfInterventions: { $sum: 1 },
+          mostCommonAnesthsiste: { $max: '$anesthsiste' },
+          mostCommonNurse: {
+            $max: {
+              $cond: {
+                if: { $isArray: '$nurse1' },
+                then: '$nurse1',
+                else: '$nurse2',
+              },
+            },
+          },
+          mostCommonRoomNumber: { $max: '$roomNumber' },
+          mostCommonIntervention: { $max: '$intervention' },
+        },
+      },
+      {
+        $sort: { numberOfInterventions: -1 },
+      },
+    ],
+    function (err, results) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(results);
+      }
+    }
+  );
 };
