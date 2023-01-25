@@ -5,7 +5,7 @@ const InterventionsSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  speciality: {
+  specialty: {
     type: String,
     required: true,
   },

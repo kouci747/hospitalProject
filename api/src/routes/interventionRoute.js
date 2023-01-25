@@ -20,4 +20,6 @@ router.get(
   interventionsController.getGroupsOfSurgeonsAndAnesthesist
 );
 
+//test
+router.get('/getAnest', interventionsController.getAnest);
 module.exports = router;

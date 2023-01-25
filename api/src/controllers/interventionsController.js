@@ -39,22 +39,13 @@ exports.getSurgeonsByNumberOfInterventions = (req, res) => {
       $group: {
         _id: {
           surgeon: '$surgeon',
+          specialty: '$specialty',
         },
 
         count: { $sum: 1 },
       },
     },
     { $sort: { count: -1 } },
-    // {
-    //   $group: {
-    //     _id: {
-    //       surgeon: '$surgeon',
-    //       anesthsiste: '$anesthsiste',
-    //     },
-    //     count: { $sum: 1 },
-    //   },
-    // },
-    // { $sort: { count: -1 } },
   ])
 
     .then((chirurgiens) => {
@@ -65,7 +56,73 @@ exports.getSurgeonsByNumberOfInterventions = (req, res) => {
     });
 };
 
-exports.getGroupsOfSurgeonsAndAnesthesist = (req, res) => {
+const surAneGrpOcc = async () =>
+  Intervention.aggregate([
+    {
+      $group: {
+        _id: {
+          surgeon: '$surgeon',
+
+          anesthsiste: '$anesthsiste',
+        },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+//la salle dans laquelle un chirurgien a le plus opéré :
+const salleOperationFav = async () =>
+  Intervention.aggregate([
+    {
+      $group: {
+        _id: {
+          surgeon: '$surgeon',
+
+          roomNumber: '$roomNumber',
+        },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+// exports.getGroupsOfSurgeonsAndAnesthesist = async (req, res) => {
+//   const getData = await surAneGrpOcc();
+//   const getData1 = await surAneGrpOcc1();
+//   const getData2 = await surAneGrpOcc2();
+
+//   res.send({data1: getData, data2: });
+// };
+
+//Renvoie les occurences chirurgien-anesthesiste + la salle la plus frequentée par le chirurgien
+exports.getGroupsOfSurgeonsAndAnesthesist = async (req, res) => {
+  const getData = await surAneGrpOcc();
+  const getData2 = await salleOperationFav();
+
+  res.send({ data1: getData, data2: getData2 });
+};
+
+//expolorer cette piste
+// db.collection.aggregate(
+//   { $facet: {
+//       categories: [{ $group: { _id: "$category", count: { "$sum": 1 } } }],
+//       brands:     [{ $group: { _id: "$brand",    count: { "$sum": 1 } } }]
+//   }}
+
+//explorer cette piste
+// exports.getFinalResult = async (req, res) => {
+//   Intervention.aggregate({
+//     $facet: {
+//       surgeon: [
+//         { $group: { _id: [surgeon, anesthsiste, nurse1], count: { $sum: 1 } } },
+//       ],
+//     },
+//   });
+// };
+
+exports.getAnest = (req, res) => {
+  const spe = Intervention.find().projection('specialty');
   Intervention.aggregate([
     {
       $group: {
@@ -73,13 +130,14 @@ exports.getGroupsOfSurgeonsAndAnesthesist = (req, res) => {
           surgeon: '$surgeon',
           anesthsiste: '$anesthsiste',
         },
+
         count: { $sum: 1 },
       },
     },
     { $sort: { count: -1 } },
   ])
-    .then((Surgeon_Anesthesist_groups_occ) => {
-      res.send(Surgeon_Anesthesist_groups_occ);
+    .then((nurse) => {
+      res.send(nurse);
     })
     .catch((err) => {
       res.send(err);
