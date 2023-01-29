@@ -20,6 +20,12 @@ router.get(
   interventionsController.getGroupsOfSurgeonsAndAnesthesist
 );
 
+//GET : http://localhost:9000/api/v1/intervention/getMostUsedOperatingRoom
+router.get(
+  '/getMostUsedOperatingRoom',
+  interventionsController.getMostUsedOperatingRoom
+);
+
 //test
 router.get('/getAnest', interventionsController.getAnest);
 
@@ -27,6 +33,18 @@ router.get('/getAnest', interventionsController.getAnest);
 router.get(
   '/getMostFreqIntervention',
   interventionsController.getMostFreqIntervention
+);
+
+//favorite nurse1 : GET http://localhost:9000/api/v1/intervention/getMostCommonNurse1
+router.get('/getMostCommonNurse1', interventionsController.getMostCommonNurse1);
+
+//favorite nurse2 : GET http://localhost:9000/api/v1/intervention/getMostCommonNurse2
+router.get('/getMostCommonNurse2', interventionsController.getMostCommonNurse2);
+
+//barre de recherche pour trouver un médecin
+router.get(
+  '/findAllSurgeonInterventionsByName',
+  interventionsController.findAllSurgeonInterventionsByName
 );
 
 router.get('/resultatTri', interventionsController.resultatTri);
