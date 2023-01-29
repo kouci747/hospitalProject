@@ -47,5 +47,11 @@ router.get(
   interventionsController.findAllSurgeonInterventionsByName
 );
 
+//
+router.get(
+  '/mostCommunNurseOneAndTwo',
+  interventionsController.mostCommunNurseOneAndTwo
+);
+
 router.get('/resultatTri', interventionsController.resultatTri);
 module.exports = router;

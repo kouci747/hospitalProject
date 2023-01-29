@@ -33,8 +33,8 @@ exports.getAllInterventions = (req, res) => {
 
 //Récupérer les interventions, filtrées selon la demande du test technique
 //récupère et classe les chirurgiens par leur nombre d'intervention (ordre décroissant)
-exports.getSurgeonsByNumberOfInterventions = (req, res) => {
-  Intervention.aggregate([
+exports.getSurgeonsByNumberOfInterventions = async (req, res) => {
+  await Intervention.aggregate([
     {
       $group: {
         _id: {
@@ -72,8 +72,8 @@ const surAneGrpOcc = async () =>
   ]);
 
 //la salle dans laquelle un chirurgien a le plus opéré :
-exports.getMostUsedOperatingRoom = async (req, res) =>
-  Intervention.aggregate([
+exports.getMostUsedOperatingRoom = async (req, res) => {
+  await Intervention.aggregate([
     {
       $group: {
         _id: {
@@ -92,43 +92,16 @@ exports.getMostUsedOperatingRoom = async (req, res) =>
     .catch((err) => {
       res.send(err);
     });
-
-// exports.getGroupsOfSurgeonsAndAnesthesist = async (req, res) => {
-//   const getData = await surAneGrpOcc();
-//   const getData1 = await surAneGrpOcc1();
-//   const getData2 = await surAneGrpOcc2();
-
-//   res.send({data1: getData, data2: });
-// };
-
-//Renvoie les occurences chirurgien-anesthesiste + la salle la plus frequentée par le chirurgien
-exports.getGroupsOfSurgeonsAndAnesthesist = async (req, res) => {
-  const getData = await surAneGrpOcc();
-  const getData2 = await salleOperationFav();
-
-  res.send({ data1: getData, data2: getData2 });
 };
 
-//expolorer cette piste
-// db.collection.aggregate(
-//   { $facet: {
-//       categories: [{ $group: { _id: "$category", count: { "$sum": 1 } } }],
-//       brands:     [{ $group: { _id: "$brand",    count: { "$sum": 1 } } }]
-//   }}
+//Renvoie les occurences chirurgien-anesthesiste
+exports.getGroupsOfSurgeonsAndAnesthesist = async (req, res) => {
+  const getData = await surAneGrpOcc();
 
-//explorer cette piste
-// exports.getFinalResult = async (req, res) => {
-//   Intervention.aggregate({
-//     $facet: {
-//       surgeon: [
-//         { $group: { _id: [surgeon, anesthsiste, nurse1], count: { $sum: 1 } } },
-//       ],
-//     },
-//   });
-// };
+  res.send(getData); //attention, si un médecin travaille sans anesthésiste, on aura un couple surgeon + (anest=null)...
+};
 
 exports.getAnest = (req, res) => {
-  //const spe = Intervention.find().projection('specialty');
   Intervention.aggregate([
     {
       $group: {
@@ -196,28 +169,6 @@ exports.getMostCommonNurse1 = async (req, res) => {
     });
 };
 
-exports.getMostCommonNurse1 = async (req, res) => {
-  await Intervention.aggregate([
-    {
-      $group: {
-        _id: {
-          surgeon: '$surgeon',
-          nurse1: '$nurse1',
-        },
-
-        count: { $sum: 1 },
-      },
-    },
-    { $sort: { count: -1 } },
-  ])
-    .then((nurse1) => {
-      res.send(nurse1);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-};
-
 exports.getMostCommonNurse2 = async (req, res) => {
   await Intervention.aggregate([
     {
@@ -248,20 +199,18 @@ exports.resultatTri = (req, res) => {
           _id: { surgeon: '$surgeon', specialty: '$specialty' },
           numberOfInterventions: { $sum: 1 },
           mostCommonAnesthsiste: { $max: '$anesthsiste' },
-          mostCommonNurse: {
-            $max: {
-              $cond: {
-                if: { $gt: ['$nurse1', '$nurse2'] },
-                then: '$nurse1',
-                else: '$nurse2',
-              },
-            },
-          },
-          mostCommonRoomNumber: { $max: '$roomNumber' },
-          mostCommonIntervention: { $max: '$intervention' },
         },
       },
       {
+        mostCommonNurse: {
+          $max: {
+            $cond: {
+              if: { $gt: ['$nurse1', '$nurse2'] },
+              then: '$nurse1',
+              else: '$nurse2',
+            },
+          },
+        },
         $sort: { numberOfInterventions: -1 },
       },
     ],
@@ -282,4 +231,29 @@ exports.findAllSurgeonInterventionsByName = async (req, res) => {
       res.send(interventions);
     })
     .catch((err) => res.send(err));
+};
+
+exports.mostCommunNurseOneAndTwo = async (req, res) => {
+  await Intervention.aggregate([
+    {
+      $match: {
+        $or: [
+          { nurse1: 'PATITBON', surgeon: 'DARIA' },
+          { nurse2: 'PATITBON', surgeon: 'DARIA' },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: '$surgeon',
+        count: { $sum: 1 },
+      },
+    },
+  ])
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
 };
