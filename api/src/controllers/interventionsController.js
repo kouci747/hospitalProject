@@ -240,7 +240,7 @@ exports.mostCommunNurseOneAndTwo = async (req, res) => {
         $or: [
           //on sait que PATITBON a travaillé 13 fois avec le Dr. DARIA. 1 fois en tant que nurse1 et 12 fois en tant que nurse2
           { nurse1: 'PATITBON', surgeon: 'DARIA' },
-          { nurse2: 'PATITBON', surgeon: 'DARIA' },
+          { nurse2: 'PATITBON', surgeon: 'DARIA' }, //trouver comment se débarasser des valeurs gard coded
           // [
           //resultat retourné :
           //   {
