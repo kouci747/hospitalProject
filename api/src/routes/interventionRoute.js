@@ -60,5 +60,5 @@ router.get(
   '/allNursesForOneSurgeon',
   interventionsController.allNursesForOneSurgeon
 );
-router.get('/resultatTri', interventionsController.resultatTri);
+//router.get('/resultatTri', interventionsController.resultatTri); //revoir
 module.exports = router;

@@ -191,38 +191,39 @@ exports.getMostCommonNurse2 = async (req, res) => {
     });
 };
 
-exports.resultatTri = (req, res) => {
-  Intervention.aggregate(
-    [
-      {
-        $group: {
-          _id: { surgeon: '$surgeon', specialty: '$specialty' },
-          numberOfInterventions: { $sum: 1 },
-          mostCommonAnesthsiste: { $max: '$anesthsiste' },
-        },
-      },
-      {
-        mostCommonNurse: {
-          $max: {
-            $cond: {
-              if: { $gt: ['$nurse1', '$nurse2'] },
-              then: '$nurse1',
-              else: '$nurse2',
-            },
-          },
-        },
-        $sort: { numberOfInterventions: -1 },
-      },
-    ],
-    function (err, results) {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(results);
-      }
-    }
-  );
-};
+//resultat erroné pour l'infirmière avec lequel un chirurgien a le + travaillé. le reste est OK
+// exports.resultatTri = (req, res) => {
+//   Intervention.aggregate(
+//     [
+//       {
+//         $group: {
+//           _id: { surgeon: '$surgeon', specialty: '$specialty' },
+//           numberOfInterventions: { $sum: 1 },
+//           mostCommonAnesthsiste: { $max: '$anesthsiste' },
+//         },
+//       },
+//       {
+//         mostCommonNurse: {
+//           $max: {
+//             $cond: {
+//               if: { $gt: ['$nurse1', '$nurse2'] },
+//               then: '$nurse1',
+//               else: '$nurse2',
+//             },
+//           },
+//         },
+//         $sort: { numberOfInterventions: -1 },
+//       },
+//     ],
+//     function (err, results) {
+//       if (err) {
+//         console.log(err);
+//       } else {
+//         res.send(results);
+//       }
+//     }
+//   );
+// };
 
 exports.findAllSurgeonInterventionsByName = async (req, res) => {
   const surgeonName = req.body.surgeonName;
@@ -240,7 +241,7 @@ exports.mostCommunNurseOneAndTwo = async (req, res) => {
         $or: [
           //on sait que PATITBON a travaillé 13 fois avec le Dr. DARIA. 1 fois en tant que nurse1 et 12 fois en tant que nurse2
           { nurse1: 'PATITBON', surgeon: 'DARIA' },
-          { nurse2: 'PATITBON', surgeon: 'DARIA' }, //trouver comment se débarasser des valeurs gard coded
+          { nurse2: 'PATITBON', surgeon: 'DARIA' }, //trouver comment se débarasser des valeurs hard coded
           // [
           //resultat retourné :
           //   {
