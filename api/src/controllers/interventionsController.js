@@ -238,8 +238,16 @@ exports.mostCommunNurseOneAndTwo = async (req, res) => {
     {
       $match: {
         $or: [
+          //on sait que PATITBON a travaillé 13 fois avec le Dr. DARIA. 1 fois en tant que nurse1 et 12 fois en tant que nurse2
           { nurse1: 'PATITBON', surgeon: 'DARIA' },
           { nurse2: 'PATITBON', surgeon: 'DARIA' },
+          // [
+          //resultat retourné :
+          //   {
+          //     "_id": "DARIA",
+          //     "count": 13
+          //   }
+          // ]
         ],
       },
     },
@@ -248,6 +256,61 @@ exports.mostCommunNurseOneAndTwo = async (req, res) => {
         _id: '$surgeon',
         count: { $sum: 1 },
       },
+    },
+  ])
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
+exports.allNursesForOneSurgeon = async (req, res) => {
+  await Intervention.aggregate([
+    {
+      $facet: {
+        nurses1: [
+          {
+            $group: {
+              _id: '$surgeon',
+              nurses: { $addToSet: '$nurse1' },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { count: -1 } },
+        ],
+        nurses2: [
+          {
+            $group: {
+              _id: '$surgeon',
+              nurses: { $addToSet: '$nurse2' },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { count: -1 } },
+        ],
+      },
+    },
+    {
+      $project: {
+        results: {
+          $concatArrays: ['$nurses1', '$nurses2'],
+        },
+      },
+    },
+    {
+      $unwind: '$results',
+    },
+    {
+      $group: {
+        _id: '$results._id',
+        nurse: { $first: '$results.nurses' },
+        count: { $first: '$results.count' },
+      },
+    },
+    {
+      $sort: { count: -1 },
     },
   ])
     .then((result) => {
